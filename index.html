@@ -49,6 +49,26 @@ h1, h2, .bebas { font-family: 'Bebas Neue', 'Inter', sans-serif; letter-spacing:
 .intro-skip { position: absolute; bottom: 34px; color: #5b6a8a; font-size: 13px; animation: skipIn .5s ease 1.2s both; }
 @keyframes skipIn { from { opacity: 0; } to { opacity: 1; } }
 
+/* ---------- Pantalla de acceso ---------- */
+#gate { position: fixed; inset: 0; background: radial-gradient(ellipse at center, #141a2c 0%, #000 75%);
+    z-index: 200; display: flex; align-items: center; justify-content: center; padding: 20px; }
+.gate-card { text-align: center; max-width: 340px; width: 100%;
+    background: rgba(22,27,38,.85); border: 1px solid #232c44; border-radius: 18px;
+    padding: 36px 28px; box-shadow: 0 24px 70px rgba(0,0,0,.6); backdrop-filter: blur(8px); }
+.gate-logo { width: 110px; height: 110px; border-radius: 50%; object-fit: cover; margin-bottom: 14px;
+    box-shadow: 0 0 34px rgba(255,120,20,.45); }
+.gate-title { font-family: 'Bebas Neue', sans-serif; font-size: 42px; color: var(--red); letter-spacing: .06em; }
+.gate-sub { color: #8fa0bf; font-size: 13.5px; margin: 6px 0 20px; }
+.gate-card input { width: 100%; background: #0b0d12; border: 1px solid #2c3652; color: #fff;
+    border-radius: 10px; padding: 13px 14px; font-size: 15px; outline: none; margin-bottom: 12px; text-align: center; }
+.gate-card input:focus { border-color: var(--red); }
+.gate-btn { width: 100%; background: var(--red); color: #fff; border: none; border-radius: 10px;
+    padding: 13px; font-size: 16px; font-weight: 800; cursor: pointer; transition: background .2s; }
+.gate-btn:hover { background: #f6121d; }
+.gate-err { color: #ff7b7b; font-size: 13px; min-height: 20px; margin-top: 10px; }
+.shake { animation: shake .4s; }
+@keyframes shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-8px); }
+    50% { transform: translateX(8px); } 75% { transform: translateX(-5px); } }
 /* ---------- Topbar ---------- */
 .topbar { position: fixed; top: 0; left: 0; right: 0; z-index: 50;
     display: flex; align-items: center; gap: 20px; padding: 16px 34px;
@@ -68,6 +88,8 @@ h1, h2, .bebas { font-family: 'Bebas Neue', 'Inter', sans-serif; letter-spacing:
 .search button { background: var(--red); border: none; color: #fff; border-radius: 50%;
     width: 38px; height: 38px; cursor: pointer; font-size: 15px; transition: transform .15s; }
 .search button:hover { transform: scale(1.08); }
+.lock-btn { color: #8fa0bf; font-size: 19px; cursor: pointer; user-select: none; transition: color .2s; }
+.lock-btn:hover { color: #fff; }
 
 /* ---------- Hero ---------- */
 .hero { position: relative; min-height: 62vh; display: flex; align-items: flex-end;
@@ -155,7 +177,18 @@ h1, h2, .bebas { font-family: 'Bebas Neue', 'Inter', sans-serif; letter-spacing:
 </head>
 <body>
 
-<div id="intro" onclick="skipIntro()" title="Clic para saltar">
+<div id="gate">
+    <div class="gate-card" id="gateCard">
+        <img class="gate-logo" src="logo.png" alt="PinaTube">
+        <div class="gate-title">PinaTube</div>
+        <p class="gate-sub">Contenido privado · ingresa la contraseña</p>
+        <input type="password" id="gatePass" placeholder="Contraseña" autocomplete="off">
+        <button class="gate-btn" onclick="tryLogin()">Entrar</button>
+        <p class="gate-err" id="gateErr"></p>
+    </div>
+</div>
+
+<div id="intro" style="display:none" onclick="skipIntro()" title="Clic para saltar">
     <div class="intro-arch"></div>
     <div class="intro-arch a2"></div>
     <img class="intro-img" src="logo.png" alt="PinaTube">
@@ -169,6 +202,7 @@ h1, h2, .bebas { font-family: 'Bebas Neue', 'Inter', sans-serif; letter-spacing:
         <input type="text" id="q" placeholder="Buscar videos…" oninput="render()">
         <button onclick="render()" aria-label="Buscar">🔍</button>
     </div>
+    <span class="lock-btn" onclick="logout()" title="Cerrar sesión">🔒</span>
 </header>
 
 <main id="catalog">
@@ -206,11 +240,43 @@ h1, h2, .bebas { font-family: 'Bebas Neue', 'Inter', sans-serif; letter-spacing:
 <footer class="foot"><b>PINATUBE</b> · tus videos, tu plataforma</footer>
 
 <script>
+// ⚠️ CAMBIA ESTA CONTRASEÑA por la tuya
+const SITE_PASSWORD = "pinatube123";
+
 function skipIntro() {
     const el = document.getElementById('intro');
     if (el) { el.classList.add('hide'); setTimeout(() => el.remove(), 450); }
 }
-setTimeout(() => { const el = document.getElementById('intro'); if (el) el.remove(); }, 4200);
+function startIntro() {
+    const el = document.getElementById('intro');
+    if (!el) return;
+    el.style.display = 'flex'; // reinicia las animaciones CSS
+    setTimeout(() => { const e2 = document.getElementById('intro'); if (e2) e2.remove(); }, 4300);
+}
+function tryLogin() {
+    const v = document.getElementById('gatePass').value;
+    if (v === SITE_PASSWORD) {
+        sessionStorage.setItem('pina_auth', '1');
+        document.getElementById('gate').style.display = 'none';
+        startIntro();
+    } else {
+        document.getElementById('gateErr').textContent = 'Contraseña incorrecta.';
+        const c = document.getElementById('gateCard');
+        c.classList.remove('shake'); void c.offsetWidth; c.classList.add('shake');
+    }
+}
+function logout() {
+    sessionStorage.removeItem('pina_auth');
+    location.reload();
+}
+document.getElementById('gatePass').addEventListener('keydown', e => {
+    if (e.key === 'Enter') tryLogin();
+});
+// Si ya inició sesión en esta pestaña, entrar directo
+if (sessionStorage.getItem('pina_auth') === '1') {
+    document.getElementById('gate').style.display = 'none';
+    startIntro();
+}
 
 window.addEventListener('scroll', () => {
     document.getElementById('topbar').classList.toggle('solid', window.scrollY > 40);
