@@ -63,6 +63,7 @@ h1, h2, .bebas { font-family: 'Bebas Neue', 'Inter', sans-serif; letter-spacing:
 .hero-bg { position: absolute; inset: 0; background: linear-gradient(135deg, #2a0d12, #0b0d12 70%);
     display: flex; align-items: center; justify-content: center; }
 .hero-bg img { width: 100%; height: 100%; object-fit: cover; animation: kenburns 24s ease-in-out infinite alternate; }
+.hero-bg video { width: 100%; height: 100%; object-fit: cover; }
 @keyframes kenburns { from { transform: scale(1); } to { transform: scale(1.12); } }
 .hero-bg .ph { font-size: 120px; opacity: .25; }
 .hero-shade { position: absolute; inset: 0;
@@ -95,6 +96,7 @@ h1, h2, .bebas { font-family: 'Bebas Neue', 'Inter', sans-serif; letter-spacing:
     background: linear-gradient(135deg, #232f52, #0e1424); }
 .thumb img { width: 100%; height: 100%; object-fit: cover; transition: transform .3s; }
 .card:hover .thumb img { transform: scale(1.06); }
+.thumb video { width: 100%; height: 100%; object-fit: cover; }
 .thumb-ph { font-size: 46px; opacity: .6; position: absolute; inset: 0;
     display: flex; align-items: center; justify-content: center; }
 .thumb::after { content: ''; position: absolute; inset: 0;
@@ -212,9 +214,13 @@ function esc(s) {
         ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 function thumbHTML(v) {
-    const inner = v.poster
-        ? `<img src="${esc(v.poster)}" alt="" loading="lazy">`
-        : `<span class="thumb-ph">🎬</span>`;
+    let inner;
+    if (v.poster) {
+        inner = `<img src="${esc(v.poster)}" alt="" loading="lazy">`;
+    } else {
+        // Miniatura automática: primer frame del video
+        inner = `<video muted preload="metadata" playsinline src="${encodeURI(v.file)}#t=0.5"></video>`;
+    }
     return `<div class="thumb">${inner}<span class="play">▶</span></div>`;
 }
 function cardHTML(v) {
@@ -240,7 +246,8 @@ function render() {
         document.getElementById('heroDesc').textContent = f.description || '';
         document.getElementById('heroDesc').style.display = f.description ? 'block' : 'none';
         document.getElementById('heroBg').innerHTML = f.poster
-            ? `<img src="${esc(f.poster)}" alt="">` : `<span class="ph">🎬</span>`;
+            ? `<img src="${esc(f.poster)}" alt="">`
+            : `<video muted preload="metadata" playsinline src="${encodeURI(f.file)}#t=0.5"></video>`;
         document.getElementById('heroPlay').onclick = () => play(0);
     } else {
         hero.style.display = 'none';
