@@ -4,8 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>PinaTube</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
+:root { --red: #e50914; --red-dark: #b00610; --bg: #0b0d12; --card: #161b26; --line: #232c44; }
+body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: #eef1f7; min-height: 100vh; }
+h1, h2, .bebas { font-family: 'Bebas Neue', 'Inter', sans-serif; letter-spacing: .04em; }
+
 /* ---------- Intro estilo Netflix ---------- */
 #intro { position: fixed; inset: 0; background: #000; z-index: 100;
     display: flex; align-items: center; justify-content: center; cursor: pointer;
@@ -20,88 +27,168 @@
     from { transform: scale(.25) rotate(-40deg); opacity: 0; }
     40% { opacity: 1; }
     to { transform: scale(1.7) rotate(30deg); opacity: 0; } }
-.intro-logo { font-size: clamp(52px, 13vw, 128px); font-weight: 900; letter-spacing: .05em;
+.intro-logo { font-family: 'Bebas Neue', sans-serif; font-size: clamp(64px, 15vw, 150px); letter-spacing: .06em;
     background: linear-gradient(100deg, #7a0b10 15%, #e50914 38%, #ffb3b3 50%, #e50914 62%, #7a0b10 85%);
     background-size: 220% 100%; -webkit-background-clip: text; background-clip: text; color: transparent;
     filter: drop-shadow(0 0 32px rgba(229,9,20,.55));
     animation: sweep 2.3s ease-in-out .35s both, logoZoom 2.9s ease .2s both; }
 @keyframes sweep { from { background-position: 210% 0; } to { background-position: -110% 0; } }
 @keyframes logoZoom {
-    from { transform: scale(.82); opacity: 0; letter-spacing: .32em; }
+    from { transform: scale(.82); opacity: 0; letter-spacing: .3em; }
     35% { opacity: 1; }
-    to { transform: scale(1); opacity: 1; letter-spacing: .05em; } }
-.intro-skip { position: absolute; bottom: 34px; color: #5b6a8a; font-size: 13px;
-    animation: skipIn .5s ease 1.2s both; }
+    to { transform: scale(1); opacity: 1; letter-spacing: .06em; } }
+.intro-skip { position: absolute; bottom: 34px; color: #5b6a8a; font-size: 13px; animation: skipIn .5s ease 1.2s both; }
 @keyframes skipIn { from { opacity: 0; } to { opacity: 1; } }
-/* ---------- Sitio ---------- */
-body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    background: #0f1420; color: #e8ecf4; min-height: 100vh; }
-.topbar { display: flex; align-items: center; gap: 16px; padding: 14px 22px;
-    background: #141b2d; border-bottom: 1px solid #232c44; position: sticky; top: 0; z-index: 10; }
-.brand { font-size: 20px; font-weight: 800; color: #fff; }
-.search { display: flex; gap: 6px; margin-left: auto; }
-.search input { background: #0f1420; border: 1px solid #2c3652; color: #fff;
-    border-radius: 8px; padding: 8px 12px; width: 220px; font-size: 14px; }
-.search button { background: #2563eb; border: none; color: #fff; border-radius: 8px;
-    padding: 8px 14px; cursor: pointer; }
-.wrap { max-width: 1200px; margin: 0 auto; padding: 24px 20px; }
-.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 18px; }
-.card { background: #182036; border-radius: 12px; overflow: hidden; cursor: pointer;
-    border: 1px solid #232c44; transition: transform .15s; }
-.card:hover { transform: translateY(-3px); }
-.thumb { position: relative; aspect-ratio: 16/9;
-    background: linear-gradient(135deg, #1d2a4a, #101828);
-    display: flex; align-items: center; justify-content: center; overflow: hidden; }
-.thumb img { width: 100%; height: 100%; object-fit: cover; }
-.thumb-ph { font-size: 44px; opacity: .7; }
-.play { position: absolute; width: 52px; height: 52px; border-radius: 50%;
-    background: rgba(0,0,0,.55); color: #fff; font-size: 20px;
+
+/* ---------- Topbar ---------- */
+.topbar { position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+    display: flex; align-items: center; gap: 20px; padding: 16px 34px;
+    background: linear-gradient(180deg, rgba(0,0,0,.75), transparent);
+    transition: background .3s; }
+.topbar.solid { background: rgba(11,13,18,.92); backdrop-filter: blur(12px); border-bottom: 1px solid #1a2133; }
+.brand { font-family: 'Bebas Neue', sans-serif; font-size: 34px; color: var(--red);
+    letter-spacing: .06em; text-shadow: 0 2px 18px rgba(229,9,20,.45); user-select: none; }
+.search { display: flex; gap: 8px; margin-left: auto; }
+.search input { background: rgba(255,255,255,.08); border: 1px solid #2c3652; color: #fff;
+    border-radius: 20px; padding: 9px 16px; width: 230px; font-size: 14px; outline: none;
+    transition: border-color .2s, width .25s; }
+.search input:focus { border-color: var(--red); width: 280px; }
+.search button { background: var(--red); border: none; color: #fff; border-radius: 50%;
+    width: 38px; height: 38px; cursor: pointer; font-size: 15px; transition: transform .15s; }
+.search button:hover { transform: scale(1.08); }
+
+/* ---------- Hero ---------- */
+.hero { position: relative; min-height: 62vh; display: flex; align-items: flex-end;
+    overflow: hidden; margin-bottom: 8px; }
+.hero-bg { position: absolute; inset: 0; background: linear-gradient(135deg, #2a0d12, #0b0d12 70%);
     display: flex; align-items: center; justify-content: center; }
-.card-body { padding: 12px 14px; }
-.card-body h3 { font-size: 15px; color: #fff; margin-bottom: 4px; }
-.card-body p { font-size: 13px; color: #9fb0cc; }
-.empty { color: #9fb0cc; text-align: center; margin-top: 60px; }
-.player-view { display: none; }
-.player-box { background: #000; border-radius: 12px; overflow: hidden; margin-bottom: 18px; }
-.player-box video { width: 100%; max-height: 70vh; display: block; }
-.back { display: inline-block; margin-bottom: 16px; color: #7cc4ff; cursor: pointer; font-size: 15px; }
-.watch-title { font-size: 24px; margin-bottom: 8px; }
-.watch-desc { color: #b9c4da; line-height: 1.6; white-space: pre-line; }
-.foot { text-align: center; padding: 18px; color: #5b6a8a; font-size: 13px; }
+.hero-bg img { width: 100%; height: 100%; object-fit: cover; animation: kenburns 24s ease-in-out infinite alternate; }
+@keyframes kenburns { from { transform: scale(1); } to { transform: scale(1.12); } }
+.hero-bg .ph { font-size: 120px; opacity: .25; }
+.hero-shade { position: absolute; inset: 0;
+    background: linear-gradient(0deg, var(--bg) 4%, transparent 45%),
+                linear-gradient(90deg, rgba(0,0,0,.72), transparent 60%); }
+.hero-content { position: relative; padding: 40px 34px; max-width: 640px; z-index: 2; }
+.hero-kicker { color: var(--red); font-weight: 800; font-size: 13px; letter-spacing: .22em;
+    text-transform: uppercase; margin-bottom: 10px; }
+.hero-title { font-size: clamp(44px, 7vw, 84px); line-height: .95; margin-bottom: 12px;
+    text-shadow: 0 4px 30px rgba(0,0,0,.6); }
+.hero-desc { color: #c3ccdf; font-size: 15.5px; line-height: 1.6; margin-bottom: 22px;
+    display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.btn-row { display: flex; gap: 12px; }
+.btn-play { background: var(--red); color: #fff; border: none; border-radius: 8px;
+    padding: 13px 30px; font-size: 16px; font-weight: 800; cursor: pointer;
+    display: flex; align-items: center; gap: 10px; transition: transform .15s, background .2s;
+    box-shadow: 0 8px 28px rgba(229,9,20,.4); }
+.btn-play:hover { background: #f6121d; transform: translateY(-2px); }
+
+/* ---------- Filas ---------- */
+.row { padding: 10px 34px 26px; }
+.row h2 { font-size: 30px; margin-bottom: 14px; color: #fff; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 16px; }
+.card { position: relative; border-radius: 12px; overflow: hidden; cursor: pointer;
+    background: var(--card); border: 1px solid transparent;
+    transition: transform .22s ease, box-shadow .22s ease, border-color .22s; }
+.card:hover { transform: scale(1.045); z-index: 3;
+    box-shadow: 0 14px 40px rgba(0,0,0,.55), 0 0 0 2px var(--red); }
+.thumb { position: relative; aspect-ratio: 16/9; overflow: hidden;
+    background: linear-gradient(135deg, #232f52, #0e1424); }
+.thumb img { width: 100%; height: 100%; object-fit: cover; transition: transform .3s; }
+.card:hover .thumb img { transform: scale(1.06); }
+.thumb-ph { font-size: 46px; opacity: .6; position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center; }
+.thumb::after { content: ''; position: absolute; inset: 0;
+    background: linear-gradient(0deg, rgba(0,0,0,.55), transparent 55%); opacity: 0; transition: opacity .25s; }
+.card:hover .thumb::after { opacity: 1; }
+.play { position: absolute; left: 50%; top: 50%; translate: -50% -50%; z-index: 2;
+    width: 54px; height: 54px; border-radius: 50%; background: rgba(229,9,20,.92); color: #fff;
+    font-size: 19px; display: flex; align-items: center; justify-content: center;
+    opacity: 0; transform: scale(.7); transition: opacity .22s, transform .22s;
+    box-shadow: 0 6px 22px rgba(229,9,20,.55); }
+.card:hover .play { opacity: 1; transform: scale(1); }
+.card-body { padding: 12px 14px 14px; }
+.card-body h3 { font-size: 15px; font-weight: 700; color: #fff;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.card-body p { font-size: 12.5px; color: #8fa0bf; margin-top: 4px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.empty { color: #8fa0bf; text-align: center; margin: 70px 0; font-size: 16px; }
+
+/* ---------- Reproductor ---------- */
+#player { display: none; padding: 90px 34px 30px; max-width: 1100px; margin: 0 auto; }
+.back { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 18px;
+    color: #c3ccdf; cursor: pointer; font-size: 15px; font-weight: 600; }
+.back:hover { color: #fff; }
+.player-box { background: #000; border-radius: 16px; overflow: hidden; margin-bottom: 20px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.6); border: 1px solid #1c2438; }
+.player-box video { width: 100%; max-height: 68vh; display: block; }
+.watch-title { font-size: 40px; margin-bottom: 8px; }
+.watch-desc { color: #b9c4da; line-height: 1.65; white-space: pre-line; margin-bottom: 30px; }
+
+.foot { text-align: center; padding: 26px; color: #4d5a76; font-size: 13px;
+    border-top: 1px solid #161d2e; margin-top: 20px; }
+.foot b { color: var(--red); font-family: 'Bebas Neue', sans-serif; font-size: 17px; letter-spacing: .06em; }
+
 @media (max-width: 640px) {
+    .topbar { padding: 12px 16px; }
+    .brand { font-size: 27px; }
     .search input { width: 130px; }
-    .grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+    .search input:focus { width: 150px; }
+    .hero { min-height: 52vh; }
+    .hero-content, .row, #player { padding-left: 16px; padding-right: 16px; }
+    .grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
 }
 </style>
 </head>
 <body>
+
 <div id="intro" onclick="skipIntro()" title="Clic para saltar">
     <div class="intro-arch"></div>
     <div class="intro-arch a2"></div>
     <div class="intro-logo">PinaTube</div>
     <div class="intro-skip">clic para saltar</div>
 </div>
-<header class="topbar">
-    <span class="brand">🎬 PinaTube</span>
+
+<header class="topbar" id="topbar">
+    <span class="brand">PinaTube</span>
     <div class="search">
-        <input type="text" id="q" placeholder="Buscar…" oninput="render()">
-        <button onclick="render()">🔍</button>
+        <input type="text" id="q" placeholder="Buscar videos…" oninput="render()">
+        <button onclick="render()" aria-label="Buscar">🔍</button>
     </div>
 </header>
 
-<main class="wrap">
-    <div id="catalog">
+<main id="catalog">
+    <section class="hero" id="hero" style="display:none">
+        <div class="hero-bg" id="heroBg"></div>
+        <div class="hero-shade"></div>
+        <div class="hero-content">
+            <div class="hero-kicker">★ Destacado</div>
+            <h1 class="hero-title" id="heroTitle"></h1>
+            <p class="hero-desc" id="heroDesc"></p>
+            <div class="btn-row">
+                <button class="btn-play" id="heroPlay">▶ Reproducir</button>
+            </div>
+        </div>
+    </section>
+
+    <section class="row">
+        <h2>Mis videos</h2>
         <div class="grid" id="grid"></div>
         <p class="empty" id="empty" style="display:none">No hay videos todavía.</p>
-    </div>
-    <div id="player" class="player-view">
-        <span class="back" onclick="showCatalog()">← Volver al catálogo</span>
-        <div class="player-box"><video id="vid" controls playsinline></video></div>
-        <h1 class="watch-title" id="vtitle"></h1>
-        <p class="watch-desc" id="vdesc"></p>
-    </div>
+    </section>
 </main>
-<footer class="foot">PinaTube</footer>
+
+<div id="player">
+    <span class="back" onclick="showCatalog()">← Volver</span>
+    <div class="player-box"><video id="vid" controls playsinline></video></div>
+    <h1 class="watch-title" id="vtitle"></h1>
+    <p class="watch-desc" id="vdesc"></p>
+    <section class="row" style="padding:0">
+        <h2>Seguir viendo</h2>
+        <div class="grid" id="nextGrid"></div>
+    </section>
+</div>
+
+<footer class="foot"><b>PINATUBE</b> · tus videos, tu plataforma</footer>
 
 <script>
 function skipIntro() {
@@ -109,51 +196,78 @@ function skipIntro() {
     if (el) { el.classList.add('hide'); setTimeout(() => el.remove(), 450); }
 }
 setTimeout(() => { const el = document.getElementById('intro'); if (el) el.remove(); }, 4200);
+
+window.addEventListener('scroll', () => {
+    document.getElementById('topbar').classList.toggle('solid', window.scrollY > 40);
+});
+
 let VIDEOS = [];
 fetch('videos.json')
     .then(r => r.json())
     .then(d => { VIDEOS = d; render(); })
     .catch(() => { document.getElementById('empty').style.display = 'block'; });
 
-function thumbHTML(v) {
-    const img = v.poster
-        ? `<img src="${v.poster}" alt="">`
-        : `<span class="thumb-ph">🎬</span>`;
-    return `<div class="thumb">${img}<span class="play">▶</span></div>`;
-}
 function esc(s) {
     return String(s ?? '').replace(/[&<>"']/g, c =>
         ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function thumbHTML(v) {
+    const inner = v.poster
+        ? `<img src="${esc(v.poster)}" alt="" loading="lazy">`
+        : `<span class="thumb-ph">🎬</span>`;
+    return `<div class="thumb">${inner}<span class="play">▶</span></div>`;
+}
+function cardHTML(v) {
+    const i = VIDEOS.indexOf(v);
+    return `<div class="card" onclick="play(${i})">
+        ${thumbHTML(v)}
+        <div class="card-body"><h3>${esc(v.title)}</h3>
+        ${v.description ? `<p>${esc(v.description)}</p>` : ''}</div>
+    </div>`;
 }
 function render() {
     const q = document.getElementById('q').value.trim().toLowerCase();
     const list = VIDEOS.filter(v =>
         (v.title + ' ' + (v.description || '')).toLowerCase().includes(q));
-    const grid = document.getElementById('grid');
-    grid.innerHTML = list.map((v, i) => `
-        <div class="card" onclick="play(${VIDEOS.indexOf(v)})">
-            ${thumbHTML(v)}
-            <div class="card-body"><h3>${esc(v.title)}</h3>
-            ${v.description ? `<p>${esc(v.description.slice(0, 90))}</p>` : ''}</div>
-        </div>`).join('');
+    document.getElementById('grid').innerHTML = list.map(cardHTML).join('');
     document.getElementById('empty').style.display = list.length ? 'none' : 'block';
+
+    const hero = document.getElementById('hero');
+    if (VIDEOS.length && !q) {
+        const f = VIDEOS[0];
+        hero.style.display = 'flex';
+        document.getElementById('heroTitle').textContent = f.title;
+        document.getElementById('heroDesc').textContent = f.description || '';
+        document.getElementById('heroDesc').style.display = f.description ? 'block' : 'none';
+        document.getElementById('heroBg').innerHTML = f.poster
+            ? `<img src="${esc(f.poster)}" alt="">` : `<span class="ph">🎬</span>`;
+        document.getElementById('heroPlay').onclick = () => play(0);
+    } else {
+        hero.style.display = 'none';
+    }
 }
 function play(i) {
     const v = VIDEOS[i];
     document.getElementById('catalog').style.display = 'none';
-    document.getElementById('player').style.display = 'block';
+    document.querySelector('.foot').style.display = 'none';
+    const p = document.getElementById('player');
+    p.style.display = 'block';
     document.getElementById('vtitle').textContent = v.title;
     document.getElementById('vdesc').textContent = v.description || '';
     const vid = document.getElementById('vid');
     vid.poster = v.poster || '';
     vid.src = v.file;
     vid.play().catch(() => {});
+    document.getElementById('nextGrid').innerHTML =
+        VIDEOS.filter((_, j) => j !== i).slice(0, 8).map(cardHTML).join('');
     window.scrollTo(0, 0);
 }
 function showCatalog() {
     document.getElementById('vid').pause();
     document.getElementById('player').style.display = 'none';
     document.getElementById('catalog').style.display = 'block';
+    document.querySelector('.foot').style.display = 'block';
+    window.scrollTo(0, 0);
 }
 </script>
 </body>
