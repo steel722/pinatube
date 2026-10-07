@@ -351,7 +351,8 @@ window.addEventListener('scroll', () => {
 });
 
 let VIDEOS = [];
-fetch('videos.json')
+// El ?v= evita que el navegador use un videos.json viejo guardado en caché
+fetch('videos.json?v=' + Date.now())
     .then(r => r.json())
     .then(d => { VIDEOS = d; render(); })
     .catch(() => { document.getElementById('empty').style.display = 'block'; });
