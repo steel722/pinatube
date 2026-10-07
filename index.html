@@ -66,6 +66,23 @@ h1, h2, .bebas { font-family: 'Bebas Neue', 'Inter', sans-serif; letter-spacing:
     padding: 13px; font-size: 16px; font-weight: 800; cursor: pointer; transition: background .2s; }
 .gate-btn:hover { background: #f6121d; }
 .gate-err { color: #ff7b7b; font-size: 13px; min-height: 20px; margin-top: 10px; }
+.gate-avatar { font-size: 64px; margin-bottom: 6px; }
+.gate-name { font-size: 21px; font-weight: 800; margin-bottom: 16px; color: #fff; }
+.gate-back { color: #8fa0bf; font-size: 13.5px; margin-top: 14px; cursor: pointer; }
+.gate-back:hover { color: #fff; }
+/* Perfiles estilo Netflix */
+.gate-profiles { text-align: center; animation: skipIn .5s ease both; }
+.profiles { display: flex; gap: 30px; justify-content: center; margin-top: 28px; flex-wrap: wrap; }
+.profile { cursor: pointer; }
+.profile-avatar { width: 112px; height: 112px; border-radius: 20px; font-size: 58px;
+    display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, #26325a, #121828);
+    border: 3px solid transparent;
+    transition: transform .2s, border-color .2s, box-shadow .2s; }
+.profile:hover .profile-avatar { transform: scale(1.09); border-color: var(--red);
+    box-shadow: 0 0 28px rgba(229,9,20,.45); }
+.profile-name { margin-top: 12px; color: #a9b6d2; font-weight: 600; font-size: 15px; }
+.profile:hover .profile-name { color: #fff; }
 .shake { animation: shake .4s; }
 @keyframes shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-8px); }
     50% { transform: translateX(8px); } 75% { transform: translateX(-5px); } }
@@ -177,14 +194,20 @@ h1, h2, .bebas { font-family: 'Bebas Neue', 'Inter', sans-serif; letter-spacing:
 </head>
 <body>
 
-<div id="gate">
-    <div class="gate-card" id="gateCard">
-        <img class="gate-logo" src="logo.png" alt="PinaTube">
+<div id="gate" style="display:none">
+    <div class="gate-profiles" id="gateProfiles">
+        <img class="gate-logo" src="logo.png" alt="PinaTube" style="width:92px;height:92px">
         <div class="gate-title">PinaTube</div>
-        <p class="gate-sub">Contenido privado · ingresa la contraseña</p>
+        <p class="gate-sub">¿Quién está viendo?</p>
+        <div class="profiles" id="profiles"></div>
+    </div>
+    <div class="gate-card" id="gateCard" style="display:none">
+        <div class="gate-avatar" id="gateAvatar"></div>
+        <div class="gate-name" id="gateName"></div>
         <input type="password" id="gatePass" placeholder="Contraseña" autocomplete="off">
         <button class="gate-btn" onclick="tryLogin()">Entrar</button>
         <p class="gate-err" id="gateErr"></p>
+        <p class="gate-back" onclick="showProfiles()">← Cambiar de perfil</p>
     </div>
 </div>
 
@@ -240,25 +263,66 @@ h1, h2, .bebas { font-family: 'Bebas Neue', 'Inter', sans-serif; letter-spacing:
 <footer class="foot"><b>PINATUBE</b> · tus videos, tu plataforma</footer>
 
 <script>
-// ⚠️ CAMBIA ESTA CONTRASEÑA por la tuya
-const SITE_PASSWORD = "pinatube123";
+// ⚠️ CAMBIA ESTOS USUARIOS por los tuyos
+// avatar: el emoji que verá cada uno en la pantalla de perfiles
+const SITE_USERS = [
+    { name: "Usuario 1", avatar: "🍍", email: "usuario1@ejemplo.com", password: "clave1" },
+    { name: "Usuario 2", avatar: "🦖", email: "usuario2@ejemplo.com", password: "clave2" },
+    { name: "Usuario 3", avatar: "🎮", email: "usuario3@ejemplo.com", password: "clave3" },
+];
+
+let introTimer = null;
+let selectedUser = null;
 
 function skipIntro() {
+    clearTimeout(introTimer);
     const el = document.getElementById('intro');
-    if (el) { el.classList.add('hide'); setTimeout(() => el.remove(), 450); }
+    if (el) { el.classList.add('hide'); setTimeout(endIntro, 400); }
+    else endIntro();
 }
 function startIntro() {
     const el = document.getElementById('intro');
-    if (!el) return;
+    if (!el) { endIntro(); return; }
     el.style.display = 'flex'; // reinicia las animaciones CSS
-    setTimeout(() => { const e2 = document.getElementById('intro'); if (e2) e2.remove(); }, 4300);
+    introTimer = setTimeout(endIntro, 4300);
+}
+function endIntro() {
+    const el = document.getElementById('intro');
+    if (el) el.remove();
+    // Terminó la animación: mostrar perfiles (si no hay sesión)
+    if (!sessionStorage.getItem('pina_auth')) {
+        document.getElementById('gate').style.display = 'flex';
+        renderProfiles();
+    }
+}
+function renderProfiles() {
+    document.getElementById('profiles').innerHTML = SITE_USERS.map((u, i) => `
+        <div class="profile" onclick="selectProfile(${i})">
+            <div class="profile-avatar">${u.avatar}</div>
+            <div class="profile-name">${esc(u.name)}</div>
+        </div>`).join('');
+}
+function selectProfile(i) {
+    selectedUser = SITE_USERS[i];
+    document.getElementById('gateProfiles').style.display = 'none';
+    document.getElementById('gateCard').style.display = 'block';
+    document.getElementById('gateAvatar').textContent = selectedUser.avatar;
+    document.getElementById('gateName').textContent = selectedUser.name;
+    document.getElementById('gatePass').value = '';
+    document.getElementById('gateErr').textContent = '';
+    setTimeout(() => document.getElementById('gatePass').focus(), 100);
+}
+function showProfiles() {
+    selectedUser = null;
+    document.getElementById('gateCard').style.display = 'none';
+    document.getElementById('gateProfiles').style.display = 'block';
+    renderProfiles();
 }
 function tryLogin() {
-    const v = document.getElementById('gatePass').value;
-    if (v === SITE_PASSWORD) {
-        sessionStorage.setItem('pina_auth', '1');
+    const pw = document.getElementById('gatePass').value;
+    if (selectedUser && pw === selectedUser.password) {
+        sessionStorage.setItem('pina_auth', selectedUser.email);
         document.getElementById('gate').style.display = 'none';
-        startIntro();
     } else {
         document.getElementById('gateErr').textContent = 'Contraseña incorrecta.';
         const c = document.getElementById('gateCard');
@@ -272,9 +336,11 @@ function logout() {
 document.getElementById('gatePass').addEventListener('keydown', e => {
     if (e.key === 'Enter') tryLogin();
 });
-// Si ya inició sesión en esta pestaña, entrar directo
-if (sessionStorage.getItem('pina_auth') === '1') {
+// Arranque: primero la animación del logo, luego los perfiles
+if (sessionStorage.getItem('pina_auth')) {
     document.getElementById('gate').style.display = 'none';
+    startIntro();
+} else {
     startIntro();
 }
 
