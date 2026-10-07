@@ -15,8 +15,9 @@ h1, h2, .bebas { font-family: 'Bebas Neue', 'Inter', sans-serif; letter-spacing:
 
 /* ---------- Intro estilo Netflix ---------- */
 #intro { position: fixed; inset: 0; background: #000; z-index: 100;
-    display: flex; align-items: center; justify-content: center; cursor: pointer;
-    animation: introFade .7s ease 3.1s forwards; }
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 6px; cursor: pointer;
+    animation: introFade .7s ease 3.4s forwards; }
 #intro.hide { animation: introFade .4s ease forwards; }
 @keyframes introFade { to { opacity: 0; visibility: hidden; } }
 .intro-arch { position: absolute; width: 62vmin; height: 62vmin; border-radius: 50%;
@@ -27,7 +28,14 @@ h1, h2, .bebas { font-family: 'Bebas Neue', 'Inter', sans-serif; letter-spacing:
     from { transform: scale(.25) rotate(-40deg); opacity: 0; }
     40% { opacity: 1; }
     to { transform: scale(1.7) rotate(30deg); opacity: 0; } }
-.intro-logo { font-family: 'Bebas Neue', sans-serif; font-size: clamp(64px, 15vw, 150px); letter-spacing: .06em;
+.intro-img { width: min(40vmin, 300px); border-radius: 50%;
+    filter: drop-shadow(0 0 46px rgba(255,120,20,.5));
+    animation: logoImgIn 2.5s cubic-bezier(.2,.9,.25,1.2) .1s both; }
+@keyframes logoImgIn {
+    from { transform: scale(.5) rotate(-8deg); opacity: 0; }
+    45% { opacity: 1; }
+    to { transform: scale(1) rotate(0); opacity: 1; } }
+.intro-logo { font-family: 'Bebas Neue', sans-serif; font-size: clamp(44px, 10vw, 96px); letter-spacing: .06em;
     background: linear-gradient(100deg, #7a0b10 15%, #e50914 38%, #ffb3b3 50%, #e50914 62%, #7a0b10 85%);
     background-size: 220% 100%; -webkit-background-clip: text; background-clip: text; color: transparent;
     filter: drop-shadow(0 0 32px rgba(229,9,20,.55));
@@ -47,7 +55,10 @@ h1, h2, .bebas { font-family: 'Bebas Neue', 'Inter', sans-serif; letter-spacing:
     transition: background .3s; }
 .topbar.solid { background: rgba(11,13,18,.92); backdrop-filter: blur(12px); border-bottom: 1px solid #1a2133; }
 .brand { font-family: 'Bebas Neue', sans-serif; font-size: 34px; color: var(--red);
-    letter-spacing: .06em; text-shadow: 0 2px 18px rgba(229,9,20,.45); user-select: none; }
+    letter-spacing: .06em; text-shadow: 0 2px 18px rgba(229,9,20,.45); user-select: none;
+    display: flex; align-items: center; gap: 10px; }
+.brand-logo { width: 40px; height: 40px; border-radius: 50%; object-fit: cover;
+    box-shadow: 0 0 14px rgba(255,120,20,.5); }
 .search { display: flex; gap: 8px; margin-left: auto; }
 .search input { background: rgba(255,255,255,.08); border: 1px solid #2c3652; color: #fff;
     border-radius: 20px; padding: 9px 16px; width: 230px; font-size: 14px; outline: none;
@@ -146,12 +157,13 @@ h1, h2, .bebas { font-family: 'Bebas Neue', 'Inter', sans-serif; letter-spacing:
 <div id="intro" onclick="skipIntro()" title="Clic para saltar">
     <div class="intro-arch"></div>
     <div class="intro-arch a2"></div>
+    <img class="intro-img" src="logo.png" alt="PinaTube">
     <div class="intro-logo">PinaTube</div>
     <div class="intro-skip">clic para saltar</div>
 </div>
 
 <header class="topbar" id="topbar">
-    <span class="brand">PinaTube</span>
+    <span class="brand"><img class="brand-logo" src="logo.png" alt="">PinaTube</span>
     <div class="search">
         <input type="text" id="q" placeholder="Buscar videos…" oninput="render()">
         <button onclick="render()" aria-label="Buscar">🔍</button>
@@ -181,7 +193,7 @@ h1, h2, .bebas { font-family: 'Bebas Neue', 'Inter', sans-serif; letter-spacing:
 
 <div id="player">
     <span class="back" onclick="showCatalog()">← Volver</span>
-    <div class="player-box"><video id="vid" controls playsinline></video></div>
+    <div class="player-box" id="playerBox"></div>
     <h1 class="watch-title" id="vtitle"></h1>
     <p class="watch-desc" id="vdesc"></p>
     <section class="row" style="padding:0">
@@ -213,10 +225,18 @@ function esc(s) {
     return String(s ?? '').replace(/[&<>"']/g, c =>
         ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
+function ytId(url) {
+    const m = String(url || '').match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([\w-]{11})/);
+    return m ? m[1] : null;
+}
 function thumbHTML(v) {
     let inner;
+    const yid = ytId(v.file);
     if (v.poster) {
         inner = `<img src="${esc(v.poster)}" alt="" loading="lazy">`;
+    } else if (yid) {
+        // Miniatura automática de YouTube
+        inner = `<img src="https://i.ytimg.com/vi/${yid}/hqdefault.jpg" alt="" loading="lazy">`;
     } else {
         // Miniatura automática: primer frame del video
         inner = `<video muted preload="metadata" playsinline src="${encodeURI(v.file)}#t=0.5"></video>`;
@@ -245,8 +265,12 @@ function render() {
         document.getElementById('heroTitle').textContent = f.title;
         document.getElementById('heroDesc').textContent = f.description || '';
         document.getElementById('heroDesc').style.display = f.description ? 'block' : 'none';
+        const fyid = ytId(f.file);
         document.getElementById('heroBg').innerHTML = f.poster
             ? `<img src="${esc(f.poster)}" alt="">`
+            : fyid
+            ? `<img src="https://i.ytimg.com/vi/${fyid}/maxresdefault.jpg"
+                   onerror="this.src='https://i.ytimg.com/vi/${fyid}/hqdefault.jpg'" alt="">`
             : `<video muted preload="metadata" playsinline src="${encodeURI(f.file)}#t=0.5"></video>`;
         document.getElementById('heroPlay').onclick = () => play(0);
     } else {
@@ -261,16 +285,27 @@ function play(i) {
     p.style.display = 'block';
     document.getElementById('vtitle').textContent = v.title;
     document.getElementById('vdesc').textContent = v.description || '';
-    const vid = document.getElementById('vid');
-    vid.poster = v.poster || '';
-    vid.src = v.file;
-    vid.play().catch(() => {});
+    const box = document.getElementById('playerBox');
+    const yid = ytId(v.file);
+    if (yid) {
+        box.innerHTML = `<iframe id="vid" src="https://www.youtube.com/embed/${yid}?rel=0"
+            frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen style="width:100%;aspect-ratio:16/9;display:block"></iframe>`;
+    } else {
+        box.innerHTML = `<video id="vid" controls playsinline style="width:100%;max-height:68vh;display:block"></video>`;
+        const vid = document.getElementById('vid');
+        vid.poster = v.poster || '';
+        vid.src = v.file;
+        vid.play().catch(() => {});
+    }
     document.getElementById('nextGrid').innerHTML =
         VIDEOS.filter((_, j) => j !== i).slice(0, 8).map(cardHTML).join('');
     window.scrollTo(0, 0);
 }
 function showCatalog() {
-    document.getElementById('vid').pause();
+    const vid = document.getElementById('vid');
+    if (vid) { if (vid.tagName === 'VIDEO') vid.pause(); else vid.src = ''; }
+    document.getElementById('playerBox').innerHTML = '';
     document.getElementById('player').style.display = 'none';
     document.getElementById('catalog').style.display = 'block';
     document.querySelector('.foot').style.display = 'block';
