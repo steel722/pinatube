@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>PinaTube</title>
+<link rel="icon" type="image/png" href="logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -48,6 +49,43 @@ h1, h2, .bebas { font-family: 'Bebas Neue', 'Inter', sans-serif; letter-spacing:
 .intro-skip { position: absolute; bottom: 34px; color: #5b6a8a; font-size: 13px; animation: skipIn .5s ease 1.2s both; }
 @keyframes skipIn { from { opacity: 0; } to { opacity: 1; } }
 
+/* ---------- Pantalla de acceso ---------- */
+#gate { position: fixed; inset: 0; background: radial-gradient(ellipse at center, #141a2c 0%, #000 75%);
+    z-index: 200; display: flex; align-items: center; justify-content: center; padding: 20px; }
+.gate-card { text-align: center; max-width: 340px; width: 100%;
+    background: rgba(22,27,38,.85); border: 1px solid #232c44; border-radius: 18px;
+    padding: 36px 28px; box-shadow: 0 24px 70px rgba(0,0,0,.6); backdrop-filter: blur(8px); }
+.gate-logo { width: 110px; height: 110px; border-radius: 50%; object-fit: cover; margin-bottom: 14px;
+    box-shadow: 0 0 34px rgba(255,120,20,.45); }
+.gate-title { font-family: 'Bebas Neue', sans-serif; font-size: 42px; color: var(--red); letter-spacing: .06em; }
+.gate-sub { color: #8fa0bf; font-size: 13.5px; margin: 6px 0 20px; }
+.gate-card input { width: 100%; background: #0b0d12; border: 1px solid #2c3652; color: #fff;
+    border-radius: 10px; padding: 13px 14px; font-size: 15px; outline: none; margin-bottom: 12px; text-align: center; }
+.gate-card input:focus { border-color: var(--red); }
+.gate-btn { width: 100%; background: var(--red); color: #fff; border: none; border-radius: 10px;
+    padding: 13px; font-size: 16px; font-weight: 800; cursor: pointer; transition: background .2s; }
+.gate-btn:hover { background: #f6121d; }
+.gate-err { color: #ff7b7b; font-size: 13px; min-height: 20px; margin-top: 10px; }
+.gate-avatar { font-size: 64px; margin-bottom: 6px; }
+.gate-name { font-size: 21px; font-weight: 800; margin-bottom: 16px; color: #fff; }
+.gate-back { color: #8fa0bf; font-size: 13.5px; margin-top: 14px; cursor: pointer; }
+.gate-back:hover { color: #fff; }
+/* Perfiles estilo Netflix */
+.gate-profiles { text-align: center; animation: skipIn .5s ease both; }
+.profiles { display: flex; gap: 30px; justify-content: center; margin-top: 28px; flex-wrap: wrap; }
+.profile { cursor: pointer; }
+.profile-avatar { width: 112px; height: 112px; border-radius: 20px; font-size: 58px;
+    display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, #26325a, #121828);
+    border: 3px solid transparent;
+    transition: transform .2s, border-color .2s, box-shadow .2s; }
+.profile:hover .profile-avatar { transform: scale(1.09); border-color: var(--red);
+    box-shadow: 0 0 28px rgba(229,9,20,.45); }
+.profile-name { margin-top: 12px; color: #a9b6d2; font-weight: 600; font-size: 15px; }
+.profile:hover .profile-name { color: #fff; }
+.shake { animation: shake .4s; }
+@keyframes shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-8px); }
+    50% { transform: translateX(8px); } 75% { transform: translateX(-5px); } }
 /* ---------- Topbar ---------- */
 .topbar { position: fixed; top: 0; left: 0; right: 0; z-index: 50;
     display: flex; align-items: center; gap: 20px; padding: 16px 34px;
@@ -67,6 +105,8 @@ h1, h2, .bebas { font-family: 'Bebas Neue', 'Inter', sans-serif; letter-spacing:
 .search button { background: var(--red); border: none; color: #fff; border-radius: 50%;
     width: 38px; height: 38px; cursor: pointer; font-size: 15px; transition: transform .15s; }
 .search button:hover { transform: scale(1.08); }
+.lock-btn { color: #8fa0bf; font-size: 19px; cursor: pointer; user-select: none; transition: color .2s; }
+.lock-btn:hover { color: #fff; }
 
 /* ---------- Hero ---------- */
 .hero { position: relative; min-height: 62vh; display: flex; align-items: flex-end;
@@ -154,7 +194,24 @@ h1, h2, .bebas { font-family: 'Bebas Neue', 'Inter', sans-serif; letter-spacing:
 </head>
 <body>
 
-<div id="intro" onclick="skipIntro()" title="Clic para saltar">
+<div id="gate" style="display:none">
+    <div class="gate-profiles" id="gateProfiles">
+        <img class="gate-logo" src="logo.png" alt="PinaTube" style="width:92px;height:92px">
+        <div class="gate-title">PinaTube</div>
+        <p class="gate-sub">¿Quién está viendo?</p>
+        <div class="profiles" id="profiles"></div>
+    </div>
+    <div class="gate-card" id="gateCard" style="display:none">
+        <div class="gate-avatar" id="gateAvatar"></div>
+        <div class="gate-name" id="gateName"></div>
+        <input type="password" id="gatePass" placeholder="Contraseña" autocomplete="off">
+        <button class="gate-btn" onclick="tryLogin()">Entrar</button>
+        <p class="gate-err" id="gateErr"></p>
+        <p class="gate-back" onclick="showProfiles()">← Cambiar de perfil</p>
+    </div>
+</div>
+
+<div id="intro" style="display:none" onclick="skipIntro()" title="Clic para saltar">
     <div class="intro-arch"></div>
     <div class="intro-arch a2"></div>
     <img class="intro-img" src="logo.png" alt="PinaTube">
@@ -168,6 +225,7 @@ h1, h2, .bebas { font-family: 'Bebas Neue', 'Inter', sans-serif; letter-spacing:
         <input type="text" id="q" placeholder="Buscar videos…" oninput="render()">
         <button onclick="render()" aria-label="Buscar">🔍</button>
     </div>
+    <span class="lock-btn" onclick="logout()" title="Cerrar sesión">🔒</span>
 </header>
 
 <main id="catalog">
@@ -205,11 +263,86 @@ h1, h2, .bebas { font-family: 'Bebas Neue', 'Inter', sans-serif; letter-spacing:
 <footer class="foot"><b>PINATUBE</b> · tus videos, tu plataforma</footer>
 
 <script>
+// ⚠️ CAMBIA ESTOS USUARIOS por los tuyos
+// avatar: el emoji que verá cada uno en la pantalla de perfiles
+const SITE_USERS = [
+    { name: "Usuario 1", avatar: "🍍", email: "usuario1@ejemplo.com", password: "clave1" },
+    { name: "Usuario 2", avatar: "🦖", email: "usuario2@ejemplo.com", password: "clave2" },
+    { name: "Usuario 3", avatar: "🎮", email: "usuario3@ejemplo.com", password: "clave3" },
+];
+
+let introTimer = null;
+let selectedUser = null;
+
 function skipIntro() {
+    clearTimeout(introTimer);
     const el = document.getElementById('intro');
-    if (el) { el.classList.add('hide'); setTimeout(() => el.remove(), 450); }
+    if (el) { el.classList.add('hide'); setTimeout(endIntro, 400); }
+    else endIntro();
 }
-setTimeout(() => { const el = document.getElementById('intro'); if (el) el.remove(); }, 4200);
+function startIntro() {
+    const el = document.getElementById('intro');
+    if (!el) { endIntro(); return; }
+    el.style.display = 'flex'; // reinicia las animaciones CSS
+    introTimer = setTimeout(endIntro, 4300);
+}
+function endIntro() {
+    const el = document.getElementById('intro');
+    if (el) el.remove();
+    // Terminó la animación: mostrar perfiles (si no hay sesión)
+    if (!sessionStorage.getItem('pina_auth')) {
+        document.getElementById('gate').style.display = 'flex';
+        renderProfiles();
+    }
+}
+function renderProfiles() {
+    document.getElementById('profiles').innerHTML = SITE_USERS.map((u, i) => `
+        <div class="profile" onclick="selectProfile(${i})">
+            <div class="profile-avatar">${u.avatar}</div>
+            <div class="profile-name">${esc(u.name)}</div>
+        </div>`).join('');
+}
+function selectProfile(i) {
+    selectedUser = SITE_USERS[i];
+    document.getElementById('gateProfiles').style.display = 'none';
+    document.getElementById('gateCard').style.display = 'block';
+    document.getElementById('gateAvatar').textContent = selectedUser.avatar;
+    document.getElementById('gateName').textContent = selectedUser.name;
+    document.getElementById('gatePass').value = '';
+    document.getElementById('gateErr').textContent = '';
+    setTimeout(() => document.getElementById('gatePass').focus(), 100);
+}
+function showProfiles() {
+    selectedUser = null;
+    document.getElementById('gateCard').style.display = 'none';
+    document.getElementById('gateProfiles').style.display = 'block';
+    renderProfiles();
+}
+function tryLogin() {
+    const pw = document.getElementById('gatePass').value;
+    if (selectedUser && pw === selectedUser.password) {
+        sessionStorage.setItem('pina_auth', selectedUser.email);
+        document.getElementById('gate').style.display = 'none';
+    } else {
+        document.getElementById('gateErr').textContent = 'Contraseña incorrecta.';
+        const c = document.getElementById('gateCard');
+        c.classList.remove('shake'); void c.offsetWidth; c.classList.add('shake');
+    }
+}
+function logout() {
+    sessionStorage.removeItem('pina_auth');
+    location.reload();
+}
+document.getElementById('gatePass').addEventListener('keydown', e => {
+    if (e.key === 'Enter') tryLogin();
+});
+// Arranque: primero la animación del logo, luego los perfiles
+if (sessionStorage.getItem('pina_auth')) {
+    document.getElementById('gate').style.display = 'none';
+    startIntro();
+} else {
+    startIntro();
+}
 
 window.addEventListener('scroll', () => {
     document.getElementById('topbar').classList.toggle('solid', window.scrollY > 40);
